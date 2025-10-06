@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uranus</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <a href="planetes.html" class="btn-planete">Retour aux planètes</a>
+  <h1>Uranus</h1>
+  <img src="uranus.jpg" alt="Photo d'Uranus" class="image-astro" />
+  <p>Uranus est la septième planète du système solaire, située à environ 2,9 milliards de kilomètres du Soleil. Découverte en 1781 par William Herschel, Uranus fut la première planète identifiée à l’aide d’un télescope, élargissant la vision de l’univers au-delà des planètes connues depuis l’Antiquité.</p>
+  <p>Sa couleur bleu-vert provient du méthane présent dans son atmosphère, qui absorbe la lumière rouge et réfléchit la lumière bleue. Uranus est principalement composée d’hydrogène et d’hélium, mais aussi d’eau, d’ammoniac et de méthane sous forme de glace, ce qui lui vaut le titre de “géante glacée”.</p>
+  <p>Une particularité fascinante d’Uranus est son axe de rotation très incliné : la planète “roule” presque sur son orbite, avec un angle de 98°. Cette inclinaison extrême provoque des saisons uniques : chaque pôle est plongé dans la nuit ou le jour pendant 42 ans consécutifs.</p>
+  <p>Uranus possède un système d’anneaux fins et sombres, découverts en 1977, ainsi que 27 lunes connues. Parmi elles, Titania et Oberon sont les plus grandes, mais Miranda intrigue par sa surface chaotique et ses falaises vertigineuses.</p>
+  <p>La planète a été survolée une seule fois par une sonde : Voyager 2 en 1986, qui a révélé la complexité de son atmosphère, la présence de vents violents et la structure de ses anneaux. Depuis, Uranus reste un mystère, et de futures missions sont envisagées pour explorer ses secrets.</p>
+  <p>Uranus incarne la diversité et l’étrangeté du système solaire, rappelant que chaque planète possède son histoire et ses phénomènes uniques à découvrir.</p>
+
+  <h2>Le saviez-vous ?</h2>
+  <ul>
+    <li>Uranus tourne “couchée” : son axe de rotation est incliné de 98°.</li>
+    <li>Les saisons sur Uranus durent 21 ans chacune !</li>
+    <li>Miranda, lune d’Uranus, possède des falaises de 20 km de haut.</li>
+    <li>Uranus a été la première planète découverte à l’aide d’un télescope.</li>
+    <li>Dans la mythologie grecque, Uranus est le dieu du ciel.</li>
+    <li>La planète possède 13 anneaux principaux, très fins et sombres.</li>
+  </ul>
+
+  <script>
+    // Code original du CodePen pour l'effet constellation
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    var mouse = { x: width / 2, y: height / 2, active: false };
+    var params = { backgroundSpeed: 0 };
+
+    function Star(id, x, y) {
+      this.id = id;
+      this.x = x;
+      this.y = y;
+      this.r = Math.floor(Math.random() * 2) + 1;
+      var alpha = (Math.floor(Math.random() * 10) + 1) / 10 / 2;
+      this.color = "rgba(255,255,255," + alpha + ")";
+    }
+    Star.prototype.draw = function () {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = this.r * 2;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+    Star.prototype.move = function () {
+      this.y -= 0.15 + params.backgroundSpeed / 100;
+      if (this.y < 0) {
+        this.y = height;
+        this.x = Math.random() * width;
+      }
+    };
+
+    var stars = [];
+    function createStars() {
+      stars = [];
+      for (var i = 0; i < width * 0.3; i++) {
+        stars.push(new Star(i, Math.random() * width, Math.random() * height));
+      }
+    }
+    createStars();
+
+    var fade = 0;
+    function drawConstellation() {
+      if (fade <= 0) return;
+      var mouseStars = [];
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+        var dist = Math.sqrt(Math.pow(mouse.x - star.x, 2) + Math.pow(mouse.y - star.y, 2));
+        if (dist < 60) {
+          mouseStars.push(star);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(star.x, star.y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      for (var i = 0; i < mouseStars.length; i++) {
+        for (var j = i + 1; j < mouseStars.length; j++) {
+          var starA = mouseStars[i];
+          var starB = mouseStars[j];
+          var dist = Math.sqrt(Math.pow(starA.x - starB.x, 2) + Math.pow(starA.y - starB.y, 2));
+          if (dist < 50) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(starA.x, starA.y);
+            ctx.lineTo(starB.x, starB.y);
+            ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].draw();
+        stars[i].move();
+      }
+      if (mouse.active) {
+        fade += 0.08;
+        if (fade > 1) fade = 1;
+      } else {
+        fade -= 0.04;
+        if (fade < 0) fade = 0;
+      }
+      drawConstellation();
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', function () {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      createStars();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      params.backgroundSpeed = Math.abs(mouse.x - width / 2) / 20;
+      mouse.active = true;
+    });
+    document.addEventListener('mouseleave', function () {
+      mouse.active = false;
+    });
+    document.addEventListener('mousedown', function () {
+      mouse.active = true;
+    });
+    document.addEventListener('mouseup', function () {
+      mouse.active = false;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercure</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="landscape"></div>
+  <canvas id="canvas"></canvas>
+  <a href="planetes.html" class="btn-planete">Retour aux planètes</a>
+  <h1>Mercure</h1>
+  <img src="mercure.jpg" alt="Photo de Mercure" class="image-astro" />
+  <p>Mercure est la planète la plus proche du Soleil, située à seulement 58 millions de kilomètres de notre étoile. Elle est petite, rocheuse et couverte de cratères, ressemblant à la Lune par son aspect.</p>
+  <p>Sa température varie énormément: le jour, elle peut atteindre 430°C, tandis que la nuit, elle descend à -180°C. Mercure n’a presque pas d’atmosphère, ce qui explique ces écarts extrêmes.</p>
+  <p>La planète tourne très lentement sur elle-même: une journée mercurienne dure 59 jours terrestres, et une année seulement 88 jours. Mercure n’a pas de lunes.</p>
+  <p>Elle a été visitée par les sondes Mariner 10 et Messenger, qui ont cartographié sa surface et étudié son champ magnétique. La mission BepiColombo est en route pour l’explorer plus en détail.</p>
+  <p>Mercure intrigue par sa proximité avec le Soleil, ses cratères géants et son histoire géologique complexe, témoin des débuts du système solaire.</p>
+
+  <h2>Le saviez-vous ?</h2>
+  <ul>
+    <li>Mercure n’a pas de saisons, car son axe de rotation est presque perpendiculaire à son orbite.</li>
+    <li>Le bassin Caloris, un cratère géant de 1 550 km de diamètre, est l’un des plus grands du système solaire.</li>
+    <li>Malgré sa proximité avec le Soleil, Mercure n’est pas la planète la plus chaude : Vénus détient ce record.</li>
+    <li>Mercure possède une fine exosphère qui forme parfois une traînée de particules, visible par les instruments.</li>
+    <li>La sonde Messenger a permis de cartographier 100% de la surface de Mercure.</li>
+    <li>Dans la mythologie romaine, Mercure est le messager des dieux, symbole de rapidité et d’intelligence.</li>
+  </ul>
+
+
+  <script>
+    // Code original du CodePen pour l'effet constellation
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    var mouse = { x: width / 2, y: height / 2, active: false };
+    var params = { backgroundSpeed: 0 };
+
+    function Star(id, x, y) {
+      this.id = id;
+      this.x = x;
+      this.y = y;
+      this.r = Math.floor(Math.random() * 2) + 1;
+      var alpha = (Math.floor(Math.random() * 10) + 1) / 10 / 2;
+      this.color = "rgba(255,255,255," + alpha + ")";
+    }
+    Star.prototype.draw = function () {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = this.r * 2;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+    Star.prototype.move = function () {
+      this.y -= 0.15 + params.backgroundSpeed / 100;
+      if (this.y < 0) {
+        this.y = height;
+        this.x = Math.random() * width;
+      }
+    };
+
+    var stars = [];
+    function createStars() {
+      stars = [];
+      for (var i = 0; i < width * 0.3; i++) {
+        stars.push(new Star(i, Math.random() * width, Math.random() * height));
+      }
+    }
+    createStars();
+
+    var fade = 0;
+    function drawConstellation() {
+      if (fade <= 0) return;
+      var mouseStars = [];
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+        var dist = Math.sqrt(Math.pow(mouse.x - star.x, 2) + Math.pow(mouse.y - star.y, 2));
+        if (dist < 60) {
+          mouseStars.push(star);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(star.x, star.y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      for (var i = 0; i < mouseStars.length; i++) {
+        for (var j = i + 1; j < mouseStars.length; j++) {
+          var starA = mouseStars[i];
+          var starB = mouseStars[j];
+          var dist = Math.sqrt(Math.pow(starA.x - starB.x, 2) + Math.pow(starA.y - starB.y, 2));
+          if (dist < 50) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(starA.x, starA.y);
+            ctx.lineTo(starB.x, starB.y);
+            ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].draw();
+        stars[i].move();
+      }
+      if (mouse.active) {
+        fade += 0.08;
+        if (fade > 1) fade = 1;
+      } else {
+        fade -= 0.04;
+        if (fade < 0) fade = 0;
+      }
+      drawConstellation();
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', function () {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      createStars();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      params.backgroundSpeed = Math.abs(mouse.x - width / 2) / 20;
+      mouse.active = true;
+    });
+    document.addEventListener('mouseleave', function () {
+      mouse.active = false;
+    });
+    document.addEventListener('mousedown', function () {
+      mouse.active = true;
+    });
+    document.addEventListener('mouseup', function () {
+      mouse.active = false;
+    });
+  </script>
+</body>
+</html>

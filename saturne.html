@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saturne</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <a href="planetes.html" class="btn-planete">Retour aux planètes</a>
+  <h1>Saturne</h1>
+  <img src="saturne.jpg" alt="Photo de Saturne" class="image-astro" />
+  <p>Saturne est la sixième planète du système solaire, célèbre pour ses anneaux spectaculaires. Observée depuis l’Antiquité, Saturne fascine par sa beauté et sa taille : c’est la deuxième plus grande planète après Jupiter.</p>
+  <p>Ses anneaux sont composés de milliards de particules de glace et de roche, allant de quelques centimètres à plusieurs mètres. Ils s’étendent sur des centaines de milliers de kilomètres, mais sont très fins : à peine 10 m d’épaisseur.</p>
+  <p>Saturne est une géante gazeuse, principalement constituée d’hydrogène et d’hélium. Elle possède plus de 80 lunes, dont Titan, la plus grande, qui possède une atmosphère dense et des lacs de méthane liquide.</p>
+  <p>La planète a été explorée par plusieurs sondes : Pioneer, Voyager et surtout Cassini, qui a orbité Saturne de 2004 à 2017. Cassini a révélé la complexité des anneaux, la diversité des lunes et des phénomènes atmosphériques étonnants, comme l’hexagone au pôle nord.</p>
+  <p>Saturne tourne très rapidement sur elle-même : une journée dure environ 10 h 40. Sa faible densité fait qu’elle flotterait dans l’eau si on pouvait la mettre dans un océan géant !</p>
+  <p>Saturne incarne la majesté du système solaire, avec ses anneaux brillants et ses mondes mystérieux à explorer.</p>
+
+  <h2>Le saviez-vous ?</h2>
+  <ul>
+    <li>Les anneaux de Saturne sont composés à 99% de glace.</li>
+    <li>Titan, la plus grande lune de Saturne, possède des lacs et des rivières de méthane liquide.</li>
+    <li>Saturne est la planète la moins dense du système solaire : elle flotterait dans l’eau.</li>
+    <li>La sonde Cassini a découvert des geysers d’eau sur la lune Encelade.</li>
+    <li>Dans la mythologie romaine, Saturne est le dieu du temps et de l’agriculture.</li>
+    <li>Un “hexagone” géant existe au pôle nord de Saturne, visible depuis l’espace.</li>
+  </ul>
+
+  <script>
+    // Code original du CodePen pour l'effet constellation
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    var mouse = { x: width / 2, y: height / 2, active: false };
+    var params = { backgroundSpeed: 0 };
+
+    function Star(id, x, y) {
+      this.id = id;
+      this.x = x;
+      this.y = y;
+      this.r = Math.floor(Math.random() * 2) + 1;
+      var alpha = (Math.floor(Math.random() * 10) + 1) / 10 / 2;
+      this.color = "rgba(255,255,255," + alpha + ")";
+    }
+    Star.prototype.draw = function () {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = this.r * 2;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+    Star.prototype.move = function () {
+      this.y -= 0.15 + params.backgroundSpeed / 100;
+      if (this.y < 0) {
+        this.y = height;
+        this.x = Math.random() * width;
+      }
+    };
+
+    var stars = [];
+    function createStars() {
+      stars = [];
+      for (var i = 0; i < width * 0.3; i++) {
+        stars.push(new Star(i, Math.random() * width, Math.random() * height));
+      }
+    }
+    createStars();
+
+    var fade = 0;
+    function drawConstellation() {
+      if (fade <= 0) return;
+      var mouseStars = [];
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+        var dist = Math.sqrt(Math.pow(mouse.x - star.x, 2) + Math.pow(mouse.y - star.y, 2));
+        if (dist < 60) {
+          mouseStars.push(star);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(star.x, star.y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      for (var i = 0; i < mouseStars.length; i++) {
+        for (var j = i + 1; j < mouseStars.length; j++) {
+          var starA = mouseStars[i];
+          var starB = mouseStars[j];
+          var dist = Math.sqrt(Math.pow(starA.x - starB.x, 2) + Math.pow(starA.y - starB.y, 2));
+          if (dist < 50) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(starA.x, starA.y);
+            ctx.lineTo(starB.x, starB.y);
+            ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].draw();
+        stars[i].move();
+      }
+      if (mouse.active) {
+        fade += 0.08;
+        if (fade > 1) fade = 1;
+      } else {
+        fade -= 0.04;
+        if (fade < 0) fade = 0;
+      }
+      drawConstellation();
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', function () {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      createStars();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      params.backgroundSpeed = Math.abs(mouse.x - width / 2) / 20;
+      mouse.active = true;
+    });
+    document.addEventListener('mouseleave', function () {
+      mouse.active = false;
+    });
+    document.addEventListener('mousedown', function () {
+      mouse.active = true;
+    });
+    document.addEventListener('mouseup', function () {
+      mouse.active = false;
+    });
+  </script>
+</body>
+</html>

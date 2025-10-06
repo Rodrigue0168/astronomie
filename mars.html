@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mars</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <a href="planetes.html" class="btn-planete">Retour aux planètes</a>
+  <h1>Mars</h1>
+  <img src="mars.jpg" alt="Photo de Mars" class="image-astro" />
+  <p>Mars est la quatrième planète du système solaire, surnommée la planète rouge à cause de la rouille présente dans son sol. Sa surface est parsemée de volcans géants, dont Olympus Mons, le plus haut du système solaire, et de canyons profonds comme Valles Marineris.</p>
+  <p>Les calottes polaires de Mars sont composées de glace d’eau et de dioxyde de carbone. La planète possède deux petites lunes, Phobos et Deimos, probablement des astéroïdes capturés.</p>
+  <p>Mars intrigue les scientifiques : elle a abrité de l’eau liquide dans le passé, et des missions cherchent des traces de vie ancienne. De nombreux robots ont exploré sa surface, comme les rovers Spirit, Opportunity, Curiosity et Perseverance.</p>
+  <p>Le climat martien est froid et sec, avec des tempêtes de poussière géantes qui peuvent recouvrir toute la planète. Une année martienne dure 687 jours terrestres.</p>
+  <p>Mars est la cible de futurs projets d’exploration humaine, et son étude nous aide à mieux comprendre l’évolution des planètes et la possibilité de vie ailleurs dans l’univers.</p>
+
+  <h2>Le saviez-vous ?</h2>
+  <ul>
+    <li>Olympus Mons, le plus grand volcan du système solaire, mesure 25 km de haut.</li>
+    <li>Les tempêtes de poussière sur Mars peuvent durer des mois et recouvrir toute la planète.</li>
+    <li>Des traces d’eau gelée ont été découvertes sous la surface martienne.</li>
+    <li>La couleur rouge de Mars vient de l’oxyde de fer (rouille) présent dans le sol.</li>
+    <li>Dans la mythologie romaine, Mars est le dieu de la guerre.</li>
+    <li>Plusieurs missions ont tenté de détecter la vie sur Mars, sans résultat à ce jour.</li>
+  </ul>
+
+  <script>
+    // Code original du CodePen pour l'effet constellation
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    var mouse = { x: width / 2, y: height / 2, active: false };
+    var params = { backgroundSpeed: 0 };
+
+    function Star(id, x, y) {
+      this.id = id;
+      this.x = x;
+      this.y = y;
+      this.r = Math.floor(Math.random() * 2) + 1;
+      var alpha = (Math.floor(Math.random() * 10) + 1) / 10 / 2;
+      this.color = "rgba(255,255,255," + alpha + ")";
+    }
+    Star.prototype.draw = function () {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = this.r * 2;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+    Star.prototype.move = function () {
+      this.y -= 0.15 + params.backgroundSpeed / 100;
+      if (this.y < 0) {
+        this.y = height;
+        this.x = Math.random() * width;
+      }
+    };
+
+    var stars = [];
+    function createStars() {
+      stars = [];
+      for (var i = 0; i < width * 0.3; i++) {
+        stars.push(new Star(i, Math.random() * width, Math.random() * height));
+      }
+    }
+    createStars();
+
+    var fade = 0;
+    function drawConstellation() {
+      if (fade <= 0) return;
+      var mouseStars = [];
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+        var dist = Math.sqrt(Math.pow(mouse.x - star.x, 2) + Math.pow(mouse.y - star.y, 2));
+        if (dist < 60) {
+          mouseStars.push(star);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(star.x, star.y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      for (var i = 0; i < mouseStars.length; i++) {
+        for (var j = i + 1; j < mouseStars.length; j++) {
+          var starA = mouseStars[i];
+          var starB = mouseStars[j];
+          var dist = Math.sqrt(Math.pow(starA.x - starB.x, 2) + Math.pow(starA.y - starB.y, 2));
+          if (dist < 50) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(starA.x, starA.y);
+            ctx.lineTo(starB.x, starB.y);
+            ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].draw();
+        stars[i].move();
+      }
+      if (mouse.active) {
+        fade += 0.08;
+        if (fade > 1) fade = 1;
+      } else {
+        fade -= 0.04;
+        if (fade < 0) fade = 0;
+      }
+      drawConstellation();
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', function () {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      createStars();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      params.backgroundSpeed = Math.abs(mouse.x - width / 2) / 20;
+      mouse.active = true;
+    });
+    document.addEventListener('mouseleave', function () {
+      mouse.active = false;
+    });
+    document.addEventListener('mousedown', function () {
+      mouse.active = true;
+    });
+    document.addEventListener('mouseup', function () {
+      mouse.active = false;
+    });
+  </script>
+</body>
+</html>

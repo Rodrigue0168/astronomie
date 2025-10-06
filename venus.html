@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vénus</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="landscape"></div>
+  <canvas id="canvas"></canvas>
+  <a href="planetes.html" class="btn-planete">Retour aux planètes</a>
+  <h1>Vénus</h1>
+  <img src="vénus.jpg" alt="Photo de Vénus" class="image-astro" />
+  <p>Vénus est la deuxième planète du système solaire, souvent appelée “sœur jumelle” de la Terre en raison de sa taille similaire. Pourtant, ses conditions sont extrêmes : la température à la surface atteint 470 °C, et la pression est 90 fois supérieure à celle de la Terre.</p>
+  <p>Son atmosphère est composée principalement de dioxyde de carbone, avec des nuages d’acide sulfurique qui rendent le ciel opaque et toxique. Vénus tourne très lentement sur elle-même : un jour vénusien dure plus longtemps qu’une année vénusienne.</p>
+  <p>La planète ne possède pas de lunes. Elle brille intensément dans le ciel du matin ou du soir, d’où son surnom “étoile du berger”.</p>
+  <p>Vénus a été explorée par de nombreuses sondes : Venera, Magellan, Akatsuki… Ces missions ont révélé des volcans géants, des plaines de lave et des montagnes imposantes.</p>
+  <p>Vénus intrigue les scientifiques par son effet de serre extrême et ses phénomènes atmosphériques uniques. Elle reste un défi pour l’exploration spatiale à cause de ses conditions hostiles.</p>
+
+  <h2>Le saviez-vous ?</h2>
+  <ul>
+    <li>Vénus tourne “à l’envers” : le Soleil s’y lève à l’ouest et se couche à l’est.</li>
+    <li>Un jour sur Vénus dure 243 jours terrestres, plus long que son année (225 jours).</li>
+    <li>La pression à la surface de Vénus est équivalente à celle ressentie à 900 m de profondeur dans l’océan terrestre.</li>
+    <li>Vénus est la planète la plus chaude du système solaire, malgré sa distance au Soleil.</li>
+    <li>Les sondes Venera (URSS) ont été les premières à se poser sur Vénus et à transmettre des images de sa surface.</li>
+    <li>Dans la mythologie romaine, Vénus est la déesse de l’amour et de la beauté.</li>
+  </ul>
+
+
+  <script>
+    // Code original du CodePen pour l'effet constellation
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    var mouse = { x: width / 2, y: height / 2, active: false };
+    var params = { backgroundSpeed: 0 };
+
+    function Star(id, x, y) {
+      this.id = id;
+      this.x = x;
+      this.y = y;
+      this.r = Math.floor(Math.random() * 2) + 1;
+      var alpha = (Math.floor(Math.random() * 10) + 1) / 10 / 2;
+      this.color = "rgba(255,255,255," + alpha + ")";
+    }
+    Star.prototype.draw = function () {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = this.r * 2;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+    Star.prototype.move = function () {
+      this.y -= 0.15 + params.backgroundSpeed / 100;
+      if (this.y < 0) {
+        this.y = height;
+        this.x = Math.random() * width;
+      }
+    };
+
+    var stars = [];
+    function createStars() {
+      stars = [];
+      for (var i = 0; i < width * 0.3; i++) {
+        stars.push(new Star(i, Math.random() * width, Math.random() * height));
+      }
+    }
+    createStars();
+
+    var fade = 0;
+    function drawConstellation() {
+      if (fade <= 0) return;
+      var mouseStars = [];
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+        var dist = Math.sqrt(Math.pow(mouse.x - star.x, 2) + Math.pow(mouse.y - star.y, 2));
+        if (dist < 60) {
+          mouseStars.push(star);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(star.x, star.y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      for (var i = 0; i < mouseStars.length; i++) {
+        for (var j = i + 1; j < mouseStars.length; j++) {
+          var starA = mouseStars[i];
+          var starB = mouseStars[j];
+          var dist = Math.sqrt(Math.pow(starA.x - starB.x, 2) + Math.pow(starA.y - starB.y, 2));
+          if (dist < 50) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(starA.x, starA.y);
+            ctx.lineTo(starB.x, starB.y);
+            ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].draw();
+        stars[i].move();
+      }
+      if (mouse.active) {
+        fade += 0.08;
+        if (fade > 1) fade = 1;
+      } else {
+        fade -= 0.04;
+        if (fade < 0) fade = 0;
+      }
+      drawConstellation();
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', function () {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      createStars();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      params.backgroundSpeed = Math.abs(mouse.x - width / 2) / 20;
+      mouse.active = true;
+    });
+    document.addEventListener('mouseleave', function () {
+      mouse.active = false;
+    });
+    document.addEventListener('mousedown', function () {
+      mouse.active = true;
+    });
+    document.addEventListener('mouseup', function () {
+      mouse.active = false;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neptune</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <a href="planetes.html" class="btn-planete">Retour aux planètes</a>
+  <h1>Neptune</h1>
+  <img src="neptune.jpg" alt="Photo de Neptune" class="image-astro" />
+  <p>Neptune est la huitième et dernière planète du système solaire, située à plus de 4,5 milliards de kilomètres du Soleil. Découverte en 1846 grâce à des calculs mathématiques, Neptune est la première planète dont l’existence a été prédite avant d’être observée.</p>
+  <p>Sa couleur bleue intense provient du méthane présent dans son atmosphère, qui absorbe la lumière rouge. Neptune est une géante glacée, composée principalement d’hydrogène, d’hélium et de glaces (eau, ammoniac, méthane).</p>
+  <p>Neptune est célèbre pour ses vents violents, les plus rapides du système solaire : ils peuvent atteindre 2 100 km/h. La planète est le théâtre de tempêtes géantes, dont la “Grande Tache Sombre”, observée par la sonde Voyager 2 en 1989.</p>
+  <p>Elle possède 14 lunes connues, dont Triton, la plus grande, qui orbite en sens inverse de la rotation de Neptune. Triton est un monde glacé, avec des geysers actifs et une surface jeune.</p>
+  <p>Neptune possède aussi un système d’anneaux fins et sombres, difficilement visibles depuis la Terre. La planète reste peu explorée : seule Voyager 2 l’a survolée, révélant la richesse de son atmosphère et la diversité de ses lunes.</p>
+  <p>Neptune incarne les mystères des confins du système solaire, où les conditions extrêmes défient notre compréhension et invitent à l’exploration future.</p>
+
+  <h2>Le saviez-vous ?</h2>
+  <ul>
+    <li>Les vents de Neptune sont les plus rapides du système solaire : jusqu’à 2 100 km/h.</li>
+    <li>Triton, lune de Neptune, possède des geysers de glace et orbite “à l’envers”.</li>
+    <li>Neptune a été découverte grâce à des calculs mathématiques, avant d’être observée.</li>
+    <li>La planète possède cinq anneaux principaux, très fins et sombres.</li>
+    <li>Dans la mythologie romaine, Neptune est le dieu de la mer.</li>
+    <li>La “Grande Tache Sombre” de Neptune est une tempête géante, semblable à celle de Jupiter.</li>
+  </ul>
+
+  <script>
+    // Code original du CodePen pour l'effet constellation
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    var mouse = { x: width / 2, y: height / 2, active: false };
+    var params = { backgroundSpeed: 0 };
+
+    function Star(id, x, y) {
+      this.id = id;
+      this.x = x;
+      this.y = y;
+      this.r = Math.floor(Math.random() * 2) + 1;
+      var alpha = (Math.floor(Math.random() * 10) + 1) / 10 / 2;
+      this.color = "rgba(255,255,255," + alpha + ")";
+    }
+    Star.prototype.draw = function () {
+      ctx.save();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = '#fff';
+      ctx.shadowBlur = this.r * 2;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+    Star.prototype.move = function () {
+      this.y -= 0.15 + params.backgroundSpeed / 100;
+      if (this.y < 0) {
+        this.y = height;
+        this.x = Math.random() * width;
+      }
+    };
+
+    var stars = [];
+    function createStars() {
+      stars = [];
+      for (var i = 0; i < width * 0.3; i++) {
+        stars.push(new Star(i, Math.random() * width, Math.random() * height));
+      }
+    }
+    createStars();
+
+    var fade = 0;
+    function drawConstellation() {
+      if (fade <= 0) return;
+      var mouseStars = [];
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+        var dist = Math.sqrt(Math.pow(mouse.x - star.x, 2) + Math.pow(mouse.y - star.y, 2));
+        if (dist < 60) {
+          mouseStars.push(star);
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(star.x, star.y);
+          ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      for (var i = 0; i < mouseStars.length; i++) {
+        for (var j = i + 1; j < mouseStars.length; j++) {
+          var starA = mouseStars[i];
+          var starB = mouseStars[j];
+          var dist = Math.sqrt(Math.pow(starA.x - starB.x, 2) + Math.pow(starA.y - starB.y, 2));
+          if (dist < 50) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(starA.x, starA.y);
+            ctx.lineTo(starB.x, starB.y);
+            ctx.strokeStyle = 'rgba(255,255,255,' + fade + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].draw();
+        stars[i].move();
+      }
+      if (mouse.active) {
+        fade += 0.08;
+        if (fade > 1) fade = 1;
+      } else {
+        fade -= 0.04;
+        if (fade < 0) fade = 0;
+      }
+      drawConstellation();
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', function () {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      createStars();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      params.backgroundSpeed = Math.abs(mouse.x - width / 2) / 20;
+      mouse.active = true;
+    });
+    document.addEventListener('mouseleave', function () {
+      mouse.active = false;
+    });
+    document.addEventListener('mousedown', function () {
+      mouse.active = true;
+    });
+    document.addEventListener('mouseup', function () {
+      mouse.active = false;
+    });
+  </script>
+</body>
+</html>
